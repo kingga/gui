@@ -99,17 +99,45 @@ class Route
         return $this->function;
     }
 
-    public function run(Request &$request)
+    private function hasNamespace(string $class): bool
     {
+        echo $class . PHP_EOL;
+        $exp = explode('\\', $class, 2);
+        return count($exp) > 1;
+    }
+
+    private function slashNamespace(string &$namespace)
+    {
+        // Check for end \\.
+        if (substr($namespace, -1, 1) !== '\\') {
+            $namespace .= '\\';
+        }
+    }
+
+    public function run(Request &$request, string $base_ns = null)
+    {
+        $ns = '';
+        if ($base_ns && $this->class === null && $this->function && is_string($this->function) && !$this->hasNamespace($this->function)) {
+            $ns = $base_ns;
+            $this->slashNamespace($ns);
+        }
+
         if ($this->class === null && is_string($this->function)) {
-            return call_user_func($this->function, $request);
+            return call_user_func($ns . $this->function, $request);
         } elseif ($this->class === null) {
             $func = $this->function;
 
             return $func($request);
         }
 
-        return (new $this->class())
+        $ns = '';
+        if ($base_ns && $this->class && !$this->hasNamespace($this->class)) {
+            $ns = $base_ns;
+            $this->slashNamespace($ns);
+        }
+
+        $class = $ns . $this->class;
+        return (new $class())
             ->{$this->function}($request);
     }
 }

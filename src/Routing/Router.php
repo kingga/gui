@@ -9,12 +9,18 @@ class Router
 {
     use HasErrors;
 
+    private $base_ns;
+
+    private $middleware_ns;
+
     private $app;
 
     private $group;
 
-    public function __construct(Application &$app)
+    public function __construct(Application &$app, string $base_ns = '\\', string $middleware_ns = '\\')
     {
+        $this->base_ns = $base_ns;
+        $this->middleware_ns = $middleware_ns;
         $this->app = &$app;
         $this->group = new RouteGroup();
     }
@@ -50,12 +56,12 @@ class Router
             // Run middlewares.
             if (property_exists($info, 'middlewares')) {
                 foreach ($info->middlewares as $middleware) {
-                    $middleware->run($request);
+                    $middleware->run($request, $this->middleware_ns);
                 }
             }
 
             // Run route.
-            return $info->route->run($request);
+            return $info->route->run($request, $this->base_ns);
         } catch (\Throwable $e) {
             $this->app->terminate();
             throw $e;

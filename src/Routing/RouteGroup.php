@@ -22,19 +22,22 @@ class RouteGroup
         $this->routes = [];
     }
 
-    public function route(string $id, $route)
+    public function route(string $id, $route): self
     {
         $this->routes[$id] = new Route($id, $route);
+        return $this;
     }
 
-    public function group(RouteGroup $group)
+    public function group(RouteGroup $group): self
     {
         $this->groups[] = $group;
+        return $this;
     }
 
-    public function middleware(Middleware $middleware)
+    public function middleware(Middleware $middleware): self
     {
         $this->middlewares[] = $middleware;
+        return $this;
     }
 
     public function findRoute(string $id, array $middlewares = []): \stdClass
@@ -70,5 +73,11 @@ class RouteGroup
         }
 
         throw new RouteNotFoundException("The route '$id' cannot be found.");
+    }
+
+    public function create(callable $routes)
+    {
+        $routes($this);
+        return $this;
     }
 }

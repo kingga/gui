@@ -3,65 +3,28 @@
 require_once 'vendor/autoload.php';
 
 use Gui\Application;
-use Gui\Components\Button;
-use Gui\Components\Window;
-use Kingga\Gui\Routing\Request;
-use Kingga\Gui\Routing\RouteGroup;
 use Kingga\Gui\Routing\Router;
+use Dotenv\Dotenv;
 
-class MainController
-{
-    public function showMainWindow(Request $request)
-    {
-        $btn = (new Button())
-            ->setLeft(10)
-            ->setTop(10)
-            ->setWidth(200)
-            ->setValue('Click me!');
+// Environment configuration.
+$dotenv = Dotenv::create(__DIR__);
+$dotenv->load();
 
-        $btn->on('click', function () use ($btn) {
-            $btn->setValue('You clicked me!');
-            $request->getRouter()->handle('show_close_modal');
-        });
-    }
-
-    public function killApp(Request $request)
-    {
-        $request->getApp()->terminate();
-    }
-}
-
+// Application.
 $app = new Application([
-    'title' => 'PHP GUI',
-    'width' => 1280,
-    'height' => 720,
+    'title' => env('APP_TITLE', pathinfo(__FILE__, PATHINFO_FILENAME)),
+    'width' => env('APP_WND_WIDTH', 1280),
+    'height' => env('APP_WND_HEIGHT', 720),
 ]);
 
-$router = new Router($app);
-$router->create(function (RouteGroup $group) {
-    $group->route('main', 'MainController@showMainWindow');
-    $group->route('kill', [MainController::class, 'killApp']);
+// Router.
+$router = new Router($app, env('NS_CONTROLLERS', '\\'), env('NS_MIDDLEWARES', '\\'));
+require_once 'routes.php';
 
-    $group->route('show_close_modal', function (Request $request) {
-        $wnd = new Window([
-            'title' => 'Popup Window',
-            'width' => 800,
-            'height' => 600,
-        ]);
-
-        $btnClose = new Button([], $wnd);
-        $btnClose->setTop(10)
-            ->setLeft(10)
-            ->setWidth(200)
-            ->setValue('Close Application');
-        $btnClose->on('click', function () use ($request) {
-            $request->getRouter()->handle('kill');
-        });
-    });
-});
-
+// Startup the base view.
 $app->on('start', function () use ($app, $router) {
     $router->handle('main');
 });
 
+// Run the application.
 $app->run();
