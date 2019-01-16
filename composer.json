@@ -1,0 +1,13 @@
+{
+    "name": "kingga/gui",
+    "description": "This is an extension to gabrielrcouto/php-gui which adds a MVC like framework onto it.",
+    "require": {
+        "gabrielrcouto/php-gui": "dev-master"
+    },
+    "autoload": {
+        "psr-4": {
+            "Kingga\\Gui\\": "src/",
+            "Classes\\": "Classes/"
+        }
+    }
+}
