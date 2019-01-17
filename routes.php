@@ -14,12 +14,12 @@ use Classes\Controllers\MainController;
  * RouteGroup::group() function. The benefits of this is that you can define
  * custom middleware for each route group allowing you to run custom checks
  * on a bulk set of routes.
- * 
+ *
  * Functions:
  * RouteGroup::route(string $id, string|callable $controller);
  * RouteGroup::group(RouteGroup $group);
  * RouteGroup::middleware(Middleware $middleware);
- * 
+ *
  * Examples:
  * $group->group((new RouteGroup)->create(function () {}));
  */

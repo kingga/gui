@@ -34,7 +34,7 @@ class DB
         self::$db = new SimpleCrud(self::$pdo);
     }
 
-    protected function getCRUD()
+    protected static function getCRUD()
     {
         if (!self::$db) {
             self::createCRUD();
@@ -49,8 +49,8 @@ class DB
         if (!extension_loaded('sqlite3')) {
             throw new SQLiteExtensionNotLoaded('The SQLite extension has not been installed.');
         }
-        
-        
+
+
         $dsn = sprintf('sqlite:%s', database_path(env('DB_FILE', 'database.sqlite')));
         self::$pdo = new PDO($dsn);
     }

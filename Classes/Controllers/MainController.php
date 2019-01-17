@@ -7,6 +7,7 @@ use Gui\Components\Button;
 use Gui\Components\Label;
 use Kingga\Gui\Routing\Request;
 use Kingga\Gui\Database\DB;
+use Classes\Models\AppInfo;
 
 class MainController
 {
