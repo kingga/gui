@@ -1,4 +1,10 @@
 <?php
+/**
+ * This file contains the build command for the gtool.
+ * 
+ * @author Isaac Skelton <contact@isaacskelton.com>
+ * @package Kingga\Gui\Commands
+ */
 
 namespace Kingga\Gui\Commands;
 
@@ -7,18 +13,31 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputArgument;
 
+/**
+ * This command moves all of the files for this application into a
+ * PHAR file and copies over any dependencies which are required to
+ * run this application such as the lazurus files and run.sh script.
+ */
 class BuildApplication extends Command
 {
+    /** {@inheritDoc} */
     protected static $defaultName = 'build';
 
+    /**
+     * The build path of the PHAR file from the root directory.
+     *
+     * @var string
+     */
     protected $buildPath = 'build';
 
+    /** {@inheritDoc} */
     protected function configure()
     {
         $this->setDescription('Build the application into a .phar file.')
             ->setHelp('Build the application into a .phar file and create all of the assets for production.');
     }
 
+    /** {@inheritDoc} */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $output->section();
@@ -57,6 +76,14 @@ class BuildApplication extends Command
         $section->writeln('<info>Application Built</info>');
     }
 
+    /**
+     * Recursively copy files from allowed directories and file formats into the
+     * build path.
+     *
+     * @param string $path The path to copy.
+     * @param OutputInterface $output The output device to write to the console.
+     * @return void
+     */
     private function copyFiles(string $path, OutputInterface &$output)
     {
         $dir = new \DirectoryIterator($path);
@@ -106,6 +133,13 @@ class BuildApplication extends Command
         }
     }
 
+    /**
+     * Copy an entire directory including sub directories to a destination.
+     *
+     * @param string $src  The source path.
+     * @param string $dest The destination path.
+     * @return void
+     */
     private function copyDirectory(string $src, string $dest)
     {
         // Check for sym links.
@@ -140,6 +174,13 @@ class BuildApplication extends Command
         return true;
     }
 
+    /**
+     * Remove all files from the build directory and then remove the build
+     * directory, this should be used before building the application.
+     *
+     * @param string $path This should not be set outside of this method.
+     * @return void
+     */
     private function cleanBuildDirectory(string $path = null)
     {
         if ($path === null) {

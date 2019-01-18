@@ -1,4 +1,10 @@
 <?php
+/**
+ * This file stores the Renderer class.
+ * 
+ * @author Isaac Skelton <contact@isaacskelton.com>
+ * @package Kingga\Gui\View
+ */
 
 namespace Kingga\Gui\View;
 
@@ -7,20 +13,64 @@ use Sabre\Xml\Service;
 use Gui\Components\Window;
 use Gui\Components\Div;
 
+/**
+ * This class renders templates and also includes events. In future
+ * releases, stylesheets and include statements may be included.
+ * TODO: Add support for moustache templating {{ $variable }}.
+ */
 class Renderer
 {
+    /**
+     * A reference to the router instance.
+     *
+     * @var Router
+     */
     private $router;
 
+    /**
+     * The directory where the views are stored.
+     *
+     * @var string
+     */
     private $view_dir;
 
+    /**
+     * A list of processors used for the components.
+     * @see addProcessor()
+     *
+     * @var array
+     */
     private $processors = [];
 
+    /**
+     * A list of used namespaces, defines by <use class=""> tags
+     * inside of the template.
+     *
+     * @var array
+     */
     protected $uses = [];
 
+    /**
+     * A list of style handlers for custom attributes.
+     *
+     * @var array
+     */
     protected $styles = [];
 
+    /**
+     * A list of event handlers.
+     *
+     * @var array
+     */
     protected $events = [];
 
+    /**
+     * Set the router instance and view directory as well as the base
+     * processors, style handlers and event listeners.
+     *
+     * @param Router $router
+     * @param string $view_dir The view directory.
+     */
     public function __construct(Router &$router, string $view_dir = null)
     {
         $this->router = &$router;
@@ -36,6 +86,13 @@ class Renderer
         $this->addEventListener('onclick', [$this, 'onClick']);
     }
 
+    /**
+     * Use this to change the view directory or use null to set it
+     * back to the default 'resources/views'.
+     *
+     * @param string $view_dir
+     * @return void
+     */
     public function setViewDirectory(string $view_dir = null)
     {
         if (!$view_dir) {
@@ -49,6 +106,13 @@ class Renderer
         $this->view_dir = $view_dir;
     }
 
+    /**
+     * Add a tag processor to the renderer.
+     *
+     * @param string $class The name of the component, e.g. Gui\Components\Button::class.
+     * @param callable $process The callback used to process this component.
+     * @return void
+     */
     protected final function addProcessor(string $class, callable $process)
     {
         if (substr($class, 0, 1) !== '\\') {
@@ -58,16 +122,37 @@ class Renderer
         $this->processors[$class] = $process;
     }
 
+    /**
+     * Add a style handler for custom attributes.
+     *
+     * @param string $attrib The attribute to modify, e.g. <Button custom="value">
+     * @param callable $process
+     * @return void
+     */
     protected function addCustomStyleHandler(string $attrib, callable $process)
     {
         $this->styles[$attrib] = $process;
     }
 
+    /**
+     * Add a event listener to a custom attribute.
+     *
+     * @param string $event The event to bind to, e.g. <Button click="doSomething">
+     * @param callable $event_handler
+     * @return void
+     */
     protected function addEventListener(string $event, callable $event_handler)
     {
         $this->events[$event] = $event_handler;
     }
 
+    /**
+     * Render a view.
+     *
+     * @param string $view The name of the view.
+     * @param array $passthru The variables to pass through to the template.
+     * @return void
+     */
     public function render(string $view, array $passthru = [])
     {
         $service = new Service;
@@ -80,6 +165,13 @@ class Renderer
         $this->uses = [];
     }
 
+    /**
+     * Get the full name of a process from a short name?
+     * TODO: Document.
+     *
+     * @param string $name
+     * @return void
+     */
     private function getProcessName(string $name)
     {
         foreach ($this->processors as $procname => $process) {
@@ -91,6 +183,16 @@ class Renderer
         return false;
     }
 
+    /**
+     * Process a node list and run styles, events and custom handlers through the
+     * components.
+     *
+     * @param array $nodes
+     * @param Application|Window|Div|mixed $wnd The parent component of the component.
+     * @param string $ns The default namespace.
+     * @param array $wnd_node The node of the current container.
+     * @return void
+     */
     private function process(array $nodes, $wnd = null, $ns = '\\', $wnd_node = null)
     {
         if (isset($nodes['name'])) {
@@ -137,6 +239,13 @@ class Renderer
         }
     }
 
+    /**
+     * The tokeniser returns the name like {...}... so we
+     * process it into the namespace and component name.
+     *
+     * @param string $name
+     * @return array
+     */
     private function getNodeName(string $name): array
     {
         preg_match('/^{(.*)}(.*)$/', $name, $matches);
@@ -150,11 +259,24 @@ class Renderer
         return [$ns, $el];
     }
 
+    /**
+     * Get the name of the node with the namespace attached as a string.
+     *
+     * @param string $name
+     * @return string
+     */
     private function getNodeNameWithNamespace(string $name): string
     {
         return implode('\\', $this->getNodeName($name));
     }
 
+    /**
+     * Create the component with it's base settings.
+     *
+     * @param string $component The name of the component with namespace.
+     * @param mixed ...$args The base options for the component.
+     * @return Gui\Components\AbstractObject
+     */
     protected function createComponent(string $component, ...$args)
     {
         $pname = $this->getProcessName($component);
@@ -173,6 +295,12 @@ class Renderer
         return new $component(...$args);
     }
 
+    /**
+     * The processor for a use tag.
+     *
+     * @param array $node
+     * @return void
+     */
     private function pUse(array $node)
     {
         if (!isset($node['attributes']['class'])) {
@@ -188,18 +316,42 @@ class Renderer
         $this->uses[] = $class;
     }
 
+    /**
+     * The processor for a window tag.
+     *
+     * @param array $node
+     * @param string $name
+     * @param mixed $wnd
+     * @return void
+     */
     private function pWindow(array $node, string $name, &$wnd)
     {
         $wnd = $this->createComponent($name, $node['attributes']);
         return $wnd;
     }
 
+    /**
+     * The processor for a div tag.
+     *
+     * @param array $node
+     * @param string $name
+     * @param mixed $wnd
+     * @return void
+     */
     private function pDiv(array $node, string $name, &$wnd)
     {
         $wnd = $this->createComponent($name, $node['attributes'], $wnd);
         return $wnd;
     }
 
+    /**
+     * The processor for all tags which don't have and processors.
+     *
+     * @param array $node
+     * @param string $name
+     * @param mixed $wnd
+     * @return void
+     */
     private function pUnhandled(array $node, string $name, $wnd)
     {
         if (is_string($node['value'])) {
@@ -210,6 +362,15 @@ class Renderer
         return $this->createComponent($name, $node['attributes'], $wnd);
     }
 
+    /**
+     * Handle custom style attributes.
+     *
+     * @param array $node
+     * @param string $name
+     * @param mixed $wnd
+     * @param array $wnd_node
+     * @return void
+     */
     private function handleCustomStyling(array &$node, string $name, $wnd, array $wnd_node = null)
     {
         foreach ($this->styles as $style => $handler) {
@@ -223,6 +384,18 @@ class Renderer
         }
     }
 
+    /**
+     * The style handler for align, current only supports center and the width or the parent and child
+     * must be set.
+     *
+     * @param string $attrib
+     * @param string $value
+     * @param array $node
+     * @param string $name
+     * @param mixed $wnd
+     * @param mixed $parent
+     * @return void
+     */
     private function sAlign(string $attrib, string $value, array &$node, string $name, $wnd, $parent = null)
     {
         switch (strtolower($value)) {
@@ -241,6 +414,16 @@ class Renderer
         }
     }
 
+    /**
+     * Handle all events.
+     *
+     * @param mixed $component
+     * @param array $node
+     * @param string $name
+     * @param mixed $wnd
+     * @param array $wnd_node
+     * @return void
+     */
     private function handleEvents(&$component, array $node, string $name, &$wnd, array $wnd_node = null)
     {
         foreach ($this->events as $event => $handler) {
@@ -252,7 +435,17 @@ class Renderer
         }
     }
 
-
+    /**
+     * The event handler for a click event.
+     *
+     * @param mixed $component
+     * @param string $route
+     * @param string $name
+     * @param mixed $wnd
+     * @param array $node
+     * @param array $wnd_node
+     * @return void
+     */
     protected function onClick(&$component, string $route, string $name, &$wnd, array $node, array $wnd_node)
     {
         $component->on('click', function () use ($route, &$component, $name, &$wnd, $node, $wnd_node) {

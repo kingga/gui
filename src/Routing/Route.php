@@ -1,19 +1,50 @@
 <?php
+/**
+ * This file contains the route class.
+ * 
+ * @author Isaac Skelton <contact@isaacskelton.com>
+ * @package Kingga\Gui\Routing
+ */
 
 namespace Kingga\Gui\Routing;
 
 use Kingga\Gui\HasErrors;
 
+/**
+ * The route class contains methods around creating
+ * and running routes.
+ */
 class Route
 {
     use HasErrors;
 
+    /**
+     * The ID of the route.
+     *
+     * @var string
+     */
     private $id;
 
+    /**
+     * The class of the callback function if defined.
+     *
+     * @var string|null
+     */
     private $class;
 
+    /**
+     * The function/method of the callback function.
+     *
+     * @var callable|string
+     */
     private $function;
 
+    /**
+     * Create a route with a given ID.
+     *
+     * @param string $id The ID of the route.
+     * @param string|array|callable $route The callback for the route.
+     */
     public function __construct(string $id, $route)
     {
         $this->id = $id;
@@ -23,6 +54,12 @@ class Route
         $this->createRoute($route);
     }
 
+    /**
+     * Create the route from the callback.
+     *
+     * @param string|array|callable $route
+     * @return void
+     */
     protected function createRoute($route)
     {
         if (!is_string($route) && !is_array($route) && !is_callable($route)) {
@@ -66,6 +103,12 @@ class Route
         $this->function = $func;
     }
 
+    /**
+     * Validates a route string, e.g. Controller@methodName.
+     *
+     * @param string $route The route string.
+     * @return boolean
+     */
     protected function validateRoute(string $route): bool
     {
         $exp = explode('@', $route);
@@ -79,26 +122,52 @@ class Route
         return true;
     }
 
+    /**
+     * The getter for the routes ID.
+     *
+     * @return string
+     */
     public function getId(): string
     {
         return $this->id;
     }
 
+    /**
+     * The getter for the routes class.
+     *
+     * @return string|null
+     */
     public function getClass(): ?string
     {
         return $this->class;
     }
 
+    /**
+     * The getter for the routes function/method.
+     *
+     * @return string
+     */
     public function getFunction(): string
     {
         return $this->function;
     }
 
+    /**
+     * The callback for the routes function/method (alias).
+     *
+     * @return string
+     */
     public function getMethod(): string
     {
-        return $this->function;
+        return $this->getFunction();
     }
 
+    /**
+     * Check if a class has a namespace.
+     *
+     * @param string $class The name of the class.
+     * @return boolean
+     */
     private function hasNamespace(string $class): bool
     {
         echo $class . PHP_EOL;
@@ -106,6 +175,13 @@ class Route
         return count($exp) > 1;
     }
 
+    /**
+     * Add a slash to the end of the namespace if it doesn't have
+     * one.
+     *
+     * @param string $namespace The namespace to slash (reference).
+     * @return void
+     */
     private function slashNamespace(string &$namespace)
     {
         // Check for end \\.
@@ -114,6 +190,13 @@ class Route
         }
     }
 
+    /**
+     * Run the route passing through a new request and the arguments.
+     *
+     * @param Request $request The request to pass through to the controller.
+     * @param string $base_ns  The base namespace of the controllers if it hasn't been defined.
+     * @return mixed
+     */
     public function run(Request &$request, string $base_ns = null)
     {
         $ns = '';
