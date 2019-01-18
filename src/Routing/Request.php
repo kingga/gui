@@ -3,6 +3,7 @@
 namespace Kingga\Gui\Routing;
 
 use Gui\Application;
+use Kingga\Gui\View\Renderer;
 
 class Request
 {
@@ -12,13 +13,16 @@ class Request
 
     private $route;
 
+    private $renderer;
+
     private $args;
 
-    public function __construct(Application &$app, Router &$router, Route $route, ...$args)
+    public function __construct(Application &$app, Router &$router, Route $route, Renderer &$renderer, ...$args)
     {
         $this->app = &$app;
         $this->router = &$router;
         $this->route = $route;
+        $this->renderer = &$renderer;
         $this->args = $args;
     }
 
@@ -30,6 +34,11 @@ class Request
     public function &getRouter(): Router
     {
         return $this->router;
+    }
+
+    public function &getRenderer(): Renderer
+    {
+        return $this->renderer;
     }
 
     public function getRoute(): Route

@@ -23,11 +23,19 @@ if (!function_exists('folder_name')) {
 if (!function_exists('base_path')) {
     function base_path(string $extended = null)
     {
-        $bp = dirname(dirname(dirname(__FILE__)));
+        $dirname = null;
+        $bp = dirname(__FILE__);
+        $bp = str_replace('\\', '/', $bp);
 
-        // If the bp is the vendor folder, step back again.
-        if (folder_name($bp) === 'vendor') {
+        do {
             $bp = dirname($bp);
+            $exp = explode('/', $bp);
+            $dirname = $exp[count($exp) - 1];
+        } while ($dirname !== 'vendor');
+        $bp = dirname($bp);
+
+        if ($bp === '/') {
+            throw new \Exception('Could not find the project\'s root.');
         }
 
         // If an extended path has been defined append it.

@@ -4,6 +4,7 @@ namespace Kingga\Gui\Routing;
 
 use Gui\Application;
 use Kingga\Gui\HasErrors;
+use Kingga\Gui\View\Renderer;
 
 class Router
 {
@@ -17,12 +18,19 @@ class Router
 
     private $group;
 
+    private $renderer;
+
     public function __construct(Application &$app, string $base_ns = '\\', string $middleware_ns = '\\')
     {
         $this->base_ns = $base_ns;
         $this->middleware_ns = $middleware_ns;
         $this->app = &$app;
         $this->group = new RouteGroup();
+    }
+
+    public function setRenderer(Renderer &$renderer)
+    {
+        $this->renderer = $renderer;
     }
 
     public function __destruct()
@@ -51,7 +59,7 @@ class Router
             // RouteNotFoundException
             $info = $this->group->findRoute($id);
 
-            $request = new Request($this->app, $this, $info->route, ...$args);
+            $request = new Request($this->app, $this, $info->route, $this->renderer, ...$args);
 
             // Run middlewares.
             if (property_exists($info, 'middlewares')) {
