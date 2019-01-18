@@ -25,8 +25,12 @@ if (!function_exists('base_path')) {
     {
         // TODO: When built into the .phar file the base directory won't work
         // as the vendor directory is inside of the phar:///... directory.
-
         $dirname = null;
+        $phar = Phar::running(false);
+        if (!empty($phar)) {
+            return dirname($phar);
+        }
+
         $bp = dirname(__FILE__);
         $bp = str_replace('\\', '/', $bp);
 
