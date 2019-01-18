@@ -4,7 +4,8 @@
     "require": {
         "gabrielrcouto/php-gui": "dev-master",
         "vlucas/phpdotenv": "^3.1",
-        "simple-crud/simple-crud": "^6.12"
+        "simple-crud/simple-crud": "^6.12",
+        "symfony/console": "^4.2"
     },
     "autoload": {
         "psr-4": {
