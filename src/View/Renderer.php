@@ -12,11 +12,11 @@ use Kingga\Gui\Routing\Router;
 use Sabre\Xml\Service;
 use Gui\Components\Window;
 use Gui\Components\Div;
+use \Mustache_Engine;
 
 /**
  * This class renders templates and also includes events. In future
  * releases, stylesheets and include statements may be included.
- * TODO: Add support for moustache templating {{ $variable }}.
  */
 class Renderer
 {
@@ -26,6 +26,15 @@ class Renderer
      * @var Router
      */
     private $router;
+
+    /**
+     * This stores the mustache template renderer. If the extension
+     * is loaded the Mustache will be used, otherwise Mustache_Engine
+     * from composer.
+     *
+     * @var Mustache_Engine|\Mustache
+     */
+    private $mustache;
 
     /**
      * The directory where the views are stored.
@@ -74,6 +83,12 @@ class Renderer
     public function __construct(Router &$router, string $view_dir = null)
     {
         $this->router = &$router;
+
+        if (extension_loaded('mustache')) {
+            $this->mustache = new Mustache;
+        } else {
+            $this->mustache = new Mustache_Engine;
+        }
 
         $this->setViewDirectory($view_dir);
 
@@ -163,6 +178,19 @@ class Renderer
 
         // Cleanup.
         $this->uses = [];
+    }
+
+    /**
+     * Render the mustache template. This is usually called before rendering
+     * the components.
+     *
+     * @param string $xml
+     * @param array $passthru
+     * @return void
+     */
+    private function renderMustache(string &$xml, array $passthru)
+    {
+        $xml = $this->mustache->render($xml, $passthru);
     }
 
     /**

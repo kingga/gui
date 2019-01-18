@@ -5,7 +5,8 @@
         "gabrielrcouto/php-gui": "dev-master",
         "simple-crud/simple-crud": "^6.12",
         "sabre/xml": "^2.1",
-        "symfony/console": "^4.2"
+        "symfony/console": "^4.2",
+        "mustache/mustache": "^2.12"
     },
     "autoload": {
         "psr-4": {
