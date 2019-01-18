@@ -85,7 +85,7 @@ class Renderer
         $this->router = &$router;
 
         if (extension_loaded('mustache')) {
-            $this->mustache = new Mustache;
+            $this->mustache = new \Mustache;
         } else {
             $this->mustache = new Mustache_Engine;
         }
@@ -173,6 +173,7 @@ class Renderer
         $service = new Service;
 
         $xml = file_get_contents(sprintf('%s/%s.view.xml', $this->view_dir, $view));
+        $this->renderMustache($xml, $passthru);
         $tokens = $service->parse("<view>$xml</view>");
         $this->process($tokens);
 
