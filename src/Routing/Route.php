@@ -123,11 +123,11 @@ class Route
         }
 
         if ($this->class === null && is_string($this->function)) {
-            return call_user_func($ns . $this->function, $request);
+            return call_user_func($ns . $this->function, $request, ...$request->getArgs());
         } elseif ($this->class === null) {
             $func = $this->function;
 
-            return $func($request);
+            return $func($request, ...$request->getArgs());
         }
 
         $ns = '';
@@ -138,6 +138,6 @@ class Route
 
         $class = $ns . $this->class;
         return (new $class())
-            ->{$this->function}($request);
+            ->{$this->function}($request, ...$request->getArgs());
     }
 }

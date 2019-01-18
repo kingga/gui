@@ -12,6 +12,34 @@ class Model
 
     protected $table = '';
 
+    public static function find(int $id): ?Model
+    {
+        $model = new static;
+
+        $row = DB::table($model->getTableName())
+            ->select()
+            ->where('id = :id', [':id' => $id])
+            ->one()
+            ->run();
+
+        $model->id = $id;
+
+        return $model;
+    }
+
+    public static function select()
+    {
+        $model = new static;
+        return DB::table($model->getTableName())
+            ->select();
+    }
+
+    public static function where(string $col, $val)
+    {
+        return static::select()
+            ->where("$col = :$col", [$col => $val]);
+    }
+
     public function __get(string $name)
     {
         if (isset($this->columns[$name])) {
