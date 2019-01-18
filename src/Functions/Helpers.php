@@ -23,6 +23,9 @@ if (!function_exists('folder_name')) {
 if (!function_exists('base_path')) {
     function base_path(string $extended = null)
     {
+        // TODO: When built into the .phar file the base directory won't work
+        // as the vendor directory is inside of the phar:///... directory.
+
         $dirname = null;
         $bp = dirname(__FILE__);
         $bp = str_replace('\\', '/', $bp);
