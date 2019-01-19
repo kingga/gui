@@ -4,6 +4,3 @@ Goto [https://github.com/kingga/php-gui-template](https://github.com/kingga/php-
 
 ## NOTES
 This may change a lot as it is in really early state of development.
-
-## TODO
-The renderer still needs a lot of work.
