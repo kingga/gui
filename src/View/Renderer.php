@@ -93,6 +93,10 @@ class Renderer
     {
         $this->router = &$router;
 
+        if ($view_dir === null) {
+            $view_dir = env(base_path('PATH_VIEWS'), base_path('resources/views'));
+        }
+
         $cache_dir = $view_dir . '/cache';
         if (!is_dir($cache_dir)) {
             mkdir($cache_dir);
