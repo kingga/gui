@@ -104,3 +104,41 @@ if (!function_exists('database_path')) {
         return $bp;
     }
 }
+
+if (!function_exists('controller_path')) {
+    /**
+     * This method returns the path that the controllers are stored in.
+     *
+     * @param string $extended
+     * @return string
+     */
+    function controller_path(string $extended = null): string
+    {
+        $bp = base_path(str_replace('\\', '/', env('NS_CONTROLLERS', 'Classes\\Controllers')));
+
+        if ($extended) {
+            return sprintf('%s/%s', $bp, $extended);
+        }
+
+        return $bp;
+    }
+}
+
+if (!function_exists('model_path')) {
+    /**
+     * This method returns the path that the models are stored in.
+     *
+     * @param string $extended
+     * @return string
+     */
+    function model_path(string $extended = null): string
+    {
+        $bp = base_path(str_replace('\\', '/', env('NS_MODELS', 'Classes\\Models')));
+
+        if ($extended) {
+            return sprintf('%s/%s', $bp, $extended);
+        }
+
+        return $bp;
+    }
+}
