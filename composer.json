@@ -6,7 +6,8 @@
         "simple-crud/simple-crud": "^6.12",
         "sabre/xml": "^2.1",
         "symfony/console": "^4.2",
-        "mustache/mustache": "^2.12"
+        "mustache/mustache": "^2.12",
+        "jenssegers/blade": "^1.1"
     },
     "autoload": {
         "psr-4": {
