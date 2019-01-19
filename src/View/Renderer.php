@@ -13,6 +13,7 @@ use Sabre\Xml\Service;
 use Gui\Components\Window;
 use Gui\Components\Div;
 use \Mustache_Engine;
+use Jenssegers\Blade\Blade;
 
 /**
  * This class renders templates and also includes events. In future
@@ -28,9 +29,17 @@ class Renderer
     private $router;
 
     /**
+     * The blade instance.
+     *
+     * @var Blade
+     */
+    private $blade;
+
+    /**
      * This stores the mustache template renderer. If the extension
      * is loaded the Mustache will be used, otherwise Mustache_Engine
      * from composer.
+     * NOTE: This has been replaced with blade.
      *
      * @var Mustache_Engine|\Mustache
      */
@@ -84,11 +93,22 @@ class Renderer
     {
         $this->router = &$router;
 
-        if (extension_loaded('mustache')) {
-            $this->mustache = new \Mustache;
-        } else {
-            $this->mustache = new Mustache_Engine;
+        if ($view_dir === null) {
+            $view_dir = env(base_path('PATH_VIEWS'), base_path('resources/views'));
         }
+
+        $cache_dir = $view_dir . '/cache';
+        if (!is_dir($cache_dir)) {
+            mkdir($cache_dir);
+        }
+
+        $this->blade = new Blade($view_dir, $cache_dir);
+
+        // if (extension_loaded('mustache')) {
+        //     $this->mustache = new \Mustache;
+        // } else {
+        //     $this->mustache = new Mustache_Engine;
+        // }
 
         $this->setViewDirectory($view_dir);
 
@@ -172,8 +192,12 @@ class Renderer
     {
         $service = new Service;
 
-        $xml = file_get_contents(sprintf('%s/%s.view.xml', $this->view_dir, $view));
-        $this->renderMustache($xml, $passthru);
+        // $view = sprintf('%s/%s.view.xml', $this->view_dir, $view);
+        // $xml = file_get_contents($view);
+        // $this->renderMustache($xml, $passthru);
+
+        $xml = $this->blade->make($view, $passthru);
+
         $tokens = $service->parse("<view>$xml</view>");
         $this->process($tokens);
 

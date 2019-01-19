@@ -170,7 +170,6 @@ class Route
      */
     private function hasNamespace(string $class): bool
     {
-        echo $class . PHP_EOL;
         $exp = explode('\\', $class, 2);
         return count($exp) > 1;
     }
